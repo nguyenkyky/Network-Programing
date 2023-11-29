@@ -15,7 +15,7 @@
 #include <errno.h>
 
 #define MAX_SIZE 1024
-#define MAX_CLIENTS 2
+#define MAX_CLIENTS 10
 
 typedef struct Message
 {
@@ -139,28 +139,40 @@ void *client_handler(void *arg)
                 {
                     byte_send = send(client_sock, "OK", MAX_SIZE, 0);
                     message_received_client = recv(client_sock, new_password, MAX_SIZE - 1, 0);
-                    new_password[message_received_client - 1] = '\0';
-
-                    // Signout
-                    if (strcmp(new_password, "bye") == 0)
+                    if (message_received_client < 0 || strlen(new_password) == 0)
                     {
+                        // Đóng kết nối và kết thúc luồng
                         byte_send = send(client_sock, "Goodbye", MAX_SIZE, 0);
-                        //                                exit(0);
                         break;
                     }
-                    char *mess = convertMessage(new_password);
+                    else
+                    {
 
-                    if (strlen(mess) == 0)
-                    {
-                        byte_send = send(client_sock, "error_digital", MAX_SIZE, 0);
-                        //                                exit(0);
-                        break;
-                    }
-                    else // Change password
-                    {
-                        byte_send = send(client_sock, mess, strlen(mess), 0);
-                        changePassword(username, new_password);
-                        byte_send = send(client_sock, "exit", MAX_SIZE, 0);
+                        new_password[message_received_client - 1] = '\0';
+
+                        // Signout
+
+                        if (strcmp(new_password, "bye") == 0)
+                        {
+                            byte_send = send(client_sock, "Goodbye", MAX_SIZE, 0);
+                            //                                exit(0);
+                            break;
+                        }
+                        char *mess = convertMessage(new_password);
+
+                        if (strlen(mess) == 0)
+                        {
+                            byte_send = send(client_sock, "error_digital", MAX_SIZE, 0);
+                            //                                exit(0);
+                            break;
+                        }
+                        else // Change password
+                        {
+                            byte_send = send(client_sock, mess, strlen(mess), 0);
+                            changePassword(username, new_password);
+                            byte_send = send(client_sock, "exit", MAX_SIZE, 0);
+                            break;
+                        }
                     }
                 }
                 else if (status == 0 || status == 2)
@@ -170,7 +182,7 @@ void *client_handler(void *arg)
             }
         }
     }
-    close(client_sock);
+    // close(client_sock);
     pthread_exit(NULL);
 }
 

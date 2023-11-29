@@ -23,26 +23,26 @@ int main(int argc, char *argv[])
 	}
 
 	// Construct a TCP socket
-    if ((client_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-        {
-            perror("\nError: ");
-            exit(0);
-        }
+	if ((client_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	{
+		perror("\nError: ");
+		exit(0);
+	}
 
 	// Define the address of the server
-    bzero(&server_addr, sizeof(server_addr));
-        server_addr.sin_family = AF_INET;
-        server_addr.sin_port = htons(atoi(argv[2]));
-        server_addr.sin_addr.s_addr = inet_addr(argv[1]);
+	bzero(&server_addr, sizeof(server_addr));
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(atoi(argv[2]));
+	server_addr.sin_addr.s_addr = inet_addr(argv[1]);
 	sin_size = sizeof(struct sockaddr);
 
 	// Connect to server
-          if (connect(client_sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
-            {
-                perror("Error: ");
-                close(client_sock);
-                exit(0);
-            }
+	if (connect(client_sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
+	{
+		perror("Error: ");
+		close(client_sock);
+		exit(0);
+	}
 	bytes_received = recv(client_sock, connected, BUFF_SIZE - 1, 0);
 	if (bytes_received < 0)
 	{
@@ -107,26 +107,30 @@ int main(int argc, char *argv[])
 				return 0;
 			}
 		}
-        
+
 		// Login thanh cong
 		else if (strcmp(buff, "OK") == 0)
 		{
-			printf("OK\nEnter a string (enter \"bye\" to exit): ");
+			printf("OK\n");
+
+			printf("Enter a string (enter \"bye\" to exit): ");
 			char buff[BUFF_SIZE];
-			memset(buff, '\0', (strlen(buff) + 1));
+			memset(buff, '\0', sizeof(buff));
 			fgets(buff, BUFF_SIZE, stdin);
+
 			bytes_sent = send(client_sock, buff, strlen(buff), 0);
 		}
+
 		else if (strcmp(buff, "Goodbye") == 0)
 		{
 			printf("Good bye!\n");
 			exit(0);
 		}
-        else if (strcmp(buff, "notOK") == 0)
-        {
-            printf("Account is blocked!\n");
-            exit(0);
-        }
+		else if (strcmp(buff, "notOK") == 0)
+		{
+			printf("Account is blocked!\n");
+			exit(0);
+		}
 		else if (strcmp(buff, "error_digit") == 0)
 		{
 			printf("Error digit!\n");
@@ -147,11 +151,12 @@ int main(int argc, char *argv[])
 			printf("Exit succesfull\n");
 			return 0;
 		}
-        else {
-        buff[bytes_received] = '\0';
+		else
+		{
+			buff[bytes_received] = '\0';
 
-		printf("Reply from server: %s\n", buff);
-        }
+			printf("Reply from server: %s\n", buff);
+		}
 	}
 
 	close(client_sock);
